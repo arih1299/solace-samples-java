@@ -21,6 +21,8 @@ package com.solace.samples;
 
 import com.solacesystems.jcsmp.*;
 
+import java.sql.Timestamp;
+
 public class TopicPublisher {
 
     public static void main(String... args) throws JCSMPException {
@@ -85,7 +87,7 @@ public class TopicPublisher {
         System.out.printf("Connected. About to send message '%s' to topic '%s'...%n",text,topic.getName());
 
         while (true) {
-            System.out.println("Sending message");
+            System.out.println(new Timestamp(System.currentTimeMillis()) + " - Sending message");
             prod.send(msg, topic);
             try {
                 Thread.sleep(250);

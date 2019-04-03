@@ -20,6 +20,8 @@
 package com.solace.samples;
 
 import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.concurrent.CountDownLatch;
 
 import com.solacesystems.jcsmp.BytesXMLMessage;
@@ -84,7 +86,7 @@ public class TopicSubscriber {
                     System.out.printf("TextMessage received: '%s'%n",
                             ((TextMessage)msg).getText());
                 } else {
-                    System.out.println("Message received.");
+                    System.out.println(new Timestamp(System.currentTimeMillis()) + " - Message received.");
                 }
                 //System.out.printf("Message Dump:%n%s%n",msg.dump());
                 //latch.countDown();  // unblock main thread
