@@ -19,14 +19,7 @@
 
 package com.solace.samples;
 
-import com.solacesystems.jcsmp.JCSMPException;
-import com.solacesystems.jcsmp.JCSMPFactory;
-import com.solacesystems.jcsmp.JCSMPProperties;
-import com.solacesystems.jcsmp.JCSMPSession;
-import com.solacesystems.jcsmp.JCSMPStreamingPublishEventHandler;
-import com.solacesystems.jcsmp.TextMessage;
-import com.solacesystems.jcsmp.Topic;
-import com.solacesystems.jcsmp.XMLMessageProducer;
+import com.solacesystems.jcsmp.*;
 
 public class TopicPublisher {
 
@@ -63,9 +56,16 @@ public class TopicPublisher {
 
         session.connect();
 
-        final Topic topic = JCSMPFactory.onlyInstance().createTopic("tutorial/topic");
+        String destination = "tutorial/topic";
+        if (args.length > 3 && !args[3].isEmpty()) {
+            destination = args[3];
+        }
 
-        /** Anonymous inner-class for handling publishing events */
+        final Topic topic = JCSMPFactory.onlyInstance().createTopic(destination);
+
+        /**
+         * Anonymous inner-class for handling publishing events
+         */
         XMLMessageProducer prod = session.getMessageProducer(new JCSMPStreamingPublishEventHandler() {
             @Override
             public void responseReceived(String messageID) {
@@ -79,12 +79,35 @@ public class TopicPublisher {
         });
         // Publish-only session is now hooked up and running!
 
-        TextMessage msg = JCSMPFactory.onlyInstance().createMessage(TextMessage.class);
-        final String text = "Hello world!";
-        msg.setText(text);
+        BytesMessage msg = JCSMPFactory.onlyInstance().createMessage(BytesMessage.class);
+        final String text = createDataSize(1);
+        msg.setData(text.getBytes());
         System.out.printf("Connected. About to send message '%s' to topic '%s'...%n",text,topic.getName());
-        prod.send(msg,topic);
-        System.out.println("Message sent. Exiting.");
-        session.closeSession();
+
+        while (true) {
+            System.out.println("Sending message");
+            prod.send(msg, topic);
+            try {
+                Thread.sleep(250);
+            }
+            catch (InterruptedException e) {
+                e.printStackTrace();
+                System.out.println("Exiting.");
+                session.closeSession();
+            }
+        }
+
+    }
+
+    /**
+     * Creates a message of size @msgSize in KB.
+     */
+    private static String createDataSize(int msgSizeKB) {
+        int msgSizeB = msgSizeKB * 1024;
+        StringBuilder sb = new StringBuilder(msgSizeKB);
+        for (int i=0; i<msgSizeB; i++) {
+            sb.append('a');
+        }
+        return sb.toString();
     }
 }

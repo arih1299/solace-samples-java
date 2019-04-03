@@ -19,6 +19,7 @@
 
 package com.solace.samples;
 
+import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
 import com.solacesystems.jcsmp.BytesXMLMessage;
@@ -60,7 +61,14 @@ public class TopicSubscriber {
         if (args.length > 2) {
             properties.setProperty(JCSMPProperties.PASSWORD, args[2]); // client-password
         }
-        final Topic topic = JCSMPFactory.onlyInstance().createTopic("tutorial/topic");
+
+        String destination = "tutorial/topic";
+        if (args.length > 3 && !args[3].isEmpty()) {
+            destination = args[3];
+        }
+
+        final Topic topic = JCSMPFactory.onlyInstance().createTopic(destination);
+
         final JCSMPSession session = JCSMPFactory.onlyInstance().createSession(properties);
 
         session.connect();
@@ -78,14 +86,14 @@ public class TopicSubscriber {
                 } else {
                     System.out.println("Message received.");
                 }
-                System.out.printf("Message Dump:%n%s%n",msg.dump());
-                latch.countDown();  // unblock main thread
+                //System.out.printf("Message Dump:%n%s%n",msg.dump());
+                //latch.countDown();  // unblock main thread
             }
 
             @Override
             public void onException(JCSMPException e) {
                 System.out.printf("Consumer received exception: %s%n",e);
-                latch.countDown();  // unblock main thread
+                //latch.countDown();  // unblock main thread
             }
         });
         session.addSubscription(topic);
@@ -93,11 +101,13 @@ public class TopicSubscriber {
         cons.start();
         // Consume-only session is now hooked up and running!
 
+        System.out.println("Listening for request messages on topic " + topic + " ... Press enter to exit");
         try {
-            latch.await(); // block here until message received, and latch will flip
-        } catch (InterruptedException e) {
-            System.out.println("I was awoken while waiting");
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
         // Close consumer
         cons.close();
         System.out.println("Exiting.");
