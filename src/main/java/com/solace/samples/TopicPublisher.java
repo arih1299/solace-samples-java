@@ -82,11 +82,11 @@ public class TopicPublisher {
         // Publish-only session is now hooked up and running!
 
         BytesMessage msg = JCSMPFactory.onlyInstance().createMessage(BytesMessage.class);
-        final String text = createDataSize(1);
+        final String text = "Hello Solace!";
         msg.setData(text.getBytes());
         System.out.printf("Connected. About to send message '%s' to topic '%s'...%n",text,topic.getName());
 
-        while (true) {
+        for (int i = 0; i < 1000; i++) {
             System.out.println(new Timestamp(System.currentTimeMillis()) + " - Sending message");
             prod.send(msg, topic);
             try {
@@ -99,17 +99,5 @@ public class TopicPublisher {
             }
         }
 
-    }
-
-    /**
-     * Creates a message of size @msgSize in KB.
-     */
-    private static String createDataSize(int msgSizeKB) {
-        int msgSizeB = msgSizeKB * 1024;
-        StringBuilder sb = new StringBuilder(msgSizeKB);
-        for (int i=0; i<msgSizeB; i++) {
-            sb.append('a');
-        }
-        return sb.toString();
     }
 }
